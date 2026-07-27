@@ -1,6 +1,10 @@
-pytest==9.0.2
-scikit-learn==1.8.0
+# Önerilen başlangıç seti — dilediğini ekleyip çıkarabilirsin.
+# Çekirdek (sürümler sabitlendi, tekrarlanabilirlik için):
 numpy==2.4.3
 pandas==3.0.1
-watchdog==6.0.0
-requests==2.32.5
+scikit-learn==1.8.0
+
+# Analiz defteri ve görselleştirme (önerilen):
+jupyterlab
+matplotlib
+seaborn

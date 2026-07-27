@@ -1,180 +1,97 @@
-# DS-54 — Türkçe Ürün Yorumu Duygu Analizi: TF-IDF vs LSA Karşılaştırması
+# YorumTR — Türkçe Ürün Yorumu Duygu Analizi
 
-**Modül**: NLP / Metin Sınıflandırma (Bitirme Projesi, **opsiyonel**) • **Süre**: 3-4 saat
+**Bitirme Projesi · Veri Bilimi** • Tahmini süre: ~4-6 saat • Değerlendirme: **eğitmen incelemesi (manuel)**
 
-## 🎯 Proje Senaryosu
+---
 
-Bir e-ticaret platformunda **data scientist** olarak çalışıyorsun. Elinde
-**gerçek kullanıcılardan toplanmış yüzlerce Türkçe ürün yorumu** var — kurgusal
-örnek cümleler değil, gerçek insanların gerçek ürünler ve içerikler hakkında
-yazdığı, dengeli (yaklaşık yarı yarıya pozitif/negatif) bir veri seti.
+## 📨 Durum
 
-Bu projede tek bir görevin yok. **İki farklı metin temsili yöntemini
-karşılaştırıyorsun**:
+Bir e-ticaret platformunda **data scientist** olarak çalışıyorsun. Ürün ekibinden şu istek geliyor:
 
-- **Yöntem A — TF-IDF (seyrek/sparse temsil)**: metni, her kelime/kelime
-  ikilisinin kendi boyutu olduğu, çoğu değeri sıfır olan **seyrek** bir
-  vektöre çevirir. Basit ama şaşırtıcı derecede güçlü bir taban çizgisidir.
-- **Yöntem B — LSA / TruncatedSVD (yoğun/dense temsil)**: TF-IDF matrisini
-  **boyut indirgeme** (SVD) ile çok daha küçük, **yoğun** bir uzaya sıkıştırır.
-  Amaç, kelimelerin arkasındaki "gizil anlamsal" (latent semantic) yapıyı
-  yakalamaktır — bu, bugünün kelime **embedding**'lerinin klasik/lineer
-  atasıdır.
+> "Elimizde binlerce müşteri yorumu birikiyor ama hangisi memnun, hangisi şikayet, elle okumadan bilemiyoruz. Sana gerçek yorumlardan bir set bırakıyorum. Bunları otomatik **pozitif / negatif** ayıran bir model istiyorum. Ama tek bir yöntemle yetinme — **birkaç farklı yaklaşım dene, hangisi Türkçe'de daha iyi çalışıyor bana sayıyla göster ve neden öyle olduğunu açıkla.** Bir de modelin **nerede yanıldığına** bak; hangi yorumlarda hata yapıyor, bir örüntü var mı?"
 
-Görevin: her iki yöntemi de eğitmek, **metriklerini yan yana koymak**, hangisi
-daha iyi çalıştığını **f1 skoru** üzerinden belirlemek ve — en önemlisi —
-modelin **hangi yorumlarda yanıldığını** inceleyerek **NEDEN** böyle bir
-sonuç çıktığını yorumlamak.
+Bu senin **bitirme projen**. Sana adım adım talimat vermiyoruz — gerçek bir işte de vermezler. Veriyi ve işin hedefini veriyoruz; çözümü bir data scientist gibi sen tasarlayacaksın.
 
-> ⚠️ Bu proje sadece "sınıflandır" demiyor — **iki temsili karşılaştırıp
-> hangisinin Türkçe'de daha iyi çalıştığını ve nedenini analiz ediyorsun.**
-> Modül içindeki NLP projelerinden (Türkçe metin sınıflandırma, NLP capstone)
-> farkı da tam olarak burada: onlar TEK bir yöntemi öğretiyordu, burada iki
-> yöntemi ölçüp **hata analiziyle** yorumluyorsun.
+## 🎯 İş hedefi
 
-## 📦 Proje Kurulumu
+Türkçe ürün yorumlarını **pozitif/negatif** olarak sınıflandıran bir model kur. En az **iki farklı yaklaşım** dene, aralarında **adil bir karşılaştırma** yap ve modelin **hata yaptığı yerleri** analiz et. Sonuçları iş diliyle raporla.
+
+## 📦 Elindeki veri
+
+- `data/tr_yorumlar.csv` — gerçek Türkçe ürün yorumları, ~570 satır, dengeli (yaklaşık yarı yarıya pozitif/negatif).
+- `data/veri_sozlugu.md` — kolon açıklamaları.
+
+⚠️ **Bu gerçek dünya verisi.** Gerçek insanların yazdığı yorumlar — yazım hataları, kısaltmalar, konuşma diline özgü ifadeler var. Ayrıca Türkçe, metin işlemede İngilizce'den farklı davranır; **dile özgü tuzakları fark edip doğru ele almak** işin bir parçası (bunları senin için tek tek saymıyoruz).
+
+## 🛠️ Başlarken
 
 ```bash
-# Fork + clone
-git clone <your-fork-url>
+# 1. Bu repoyu fork'la, sonra kendi fork'unu klonla
+git clone <senin-fork-url>
 cd data-science-project-54
 
-# Virtual environment
+# 2. Sanal ortam (önerilir)
 python -m venv venv
-source venv/bin/activate        # Mac/Linux
-# venv\Scripts\activate          # Windows
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
-# Dependencies
+# 3. Önerilen kütüphaneleri kur
 pip install -r requirements.txt
 
-# Auto test runner (dosya değişince çalışır)
-python watch.py
-
-# Manuel test
-pytest tests/test_question.py -v
+# 4. Analiz defterini aç ve başla
+jupyter lab
 ```
 
-## 🔑 Kaizu Bağlantısı — `kaizu_config.py`
+Boş bir `analiz.ipynb` oluşturup keşifle başlayabilirsin.
 
-Skorunun Kaizu hesabına yazılması için **`kaizu_config.py`** dosyasını aç ve
-**`USER_ID`** alanını kendi user_id'nle değiştir:
+## ✅ Bizden beklentiler
 
-```python
-USER_ID = 0      # ← Kaizu profilinden alıp buraya yaz
-PROJECT_ID = 0   # ← Bu projeye ait, dokunma
-```
+**Nasıl** çözeceğin sana kalmış (hangi kütüphane, hangi yöntem — özgürsün). Ama iyi bir teslimatta şunları görmek istiyoruz:
 
-User_id'ni Kaizu profilinden bulabilirsin (Profile → Settings → User ID).
+1. **Metni doğru hazırla** — Türkçe metni modele vermeden önce işlemen gerekiyor. Türkçe'ye özgü sorunları fark et ve gerekçesiyle çöz.
+2. **En az 2 farklı yaklaşım dene ve adil karşılaştır** — metni sayıya çevirmenin/sınıflandırmanın birden fazla yolu var. En az ikisini kur, aynı test seti üzerinde **f1** ile kıyasla. (Adil karşılaştırma: aynı ayrım, aynı değerlendirme.)
+3. **Doğru metriği seç ve gerekçelendir** — neden accuracy tek başına yeterli/yetersiz? Bu iş için hangi metrik daha anlamlı?
+4. **Hata analizi yap** — modelin yanlış sınıfladığı yorumlara bak. Ortak bir örüntü var mı (ironi, çok kısa/bağlamsız yorumlar, hem övgü hem şikayet içeren cümleler)?
+5. **İş diliyle raporla** — hangi yöntemi neden önerirsin, model nerede güvenilir nerede değil.
 
-Skor göndermek için tüm testleri toplu çalıştırmalısın:
+## 📤 Teslim edeceklerin
 
-```bash
-python tests/test_question.py
-```
+| Dosya | Ne olmalı |
+|---|---|
+| `analiz.ipynb` | Uçtan uca analiz defterin: keşif → ön işleme → modelleme → karşılaştırma → hata analizi, kararlarını markdown hücrelerinde **anlatarak**. |
+| `train.py` | Yeniden çalıştırılabilir script: veriyi okur, modeli eğitir, karşılaştırma metriklerini ekrana basar. (`python train.py` diyip çalıştırabilmeliyiz.) |
+| `RAPOR.md` | İş diliyle raporun. `RAPOR_SABLONU.md`'deki soruları cevapla. |
 
-Bu komut tüm testleri çalıştırır, **passed/total oranını otomatik Kaizu'ya
-gönderir**. Geliştirme sırasında `pytest -v` kullanmaya devam edebilirsin
-(skor göndermez).
+## 🧭 Nasıl değerlendirilecek
 
-## 📚 Veri Seti — Gerçek Türkçe Ürün Yorumları
+Otomatik test yok — projeni bir eğitmen inceleyip aşağıdaki rubriğe göre değerlendirecek:
 
-Veri **repo'da hazır bulunur**: `data/tr_yorumlar.csv`.
+| Boyut | Puan |
+|---|---:|
+| Metin ön işleme & Türkçe farkındalığı | 15 |
+| En az 2 yaklaşım & adil karşılaştırma | 25 |
+| Değerlendirme & metrik muhakemesi | 20 |
+| Hata analizi & içgörü | 20 |
+| Rapor & iletişim | 15 |
+| Kod kalitesi & tekrar çalıştırılabilirlik | 5 |
+| **Toplam** | **100** |
 
-- **~570 gerçek internet yorumu**, **dengeli** (yaklaşık yarı yarıya
-  pozitif/negatif)
-- Sütunlar: `yorum` (metin), `duygu` (`positive` / `negative`)
-- Veri gerçek kaynaklardan derlendiği için ön elemeden geçirilmiştir; yine de
-  gerçek dünya verisidir — kurgusal, temiz cümleler değil, gerçek yazım
-  hataları, kısaltmalar ve konuşma diline özgü ifadeler içerir. Bu da onu
-  **gerçekçi** bir NLP problemi yapar.
+Geçmek için ~70/100 hedefle. **Puanın çoğu "en yüksek skoru bulmakta" değil; yöntemleri karşılaştırman, doğru metriği seçmen ve hatayı yorumlamanda.**
 
-## 📋 Görevler (`tasks/task_manager.py`)
+## 📈 Başarı hedefi
 
-`task_manager.py` dosyasındaki fonksiyonların `raise NotImplementedError(...)`
-kısmını sil, docstring'e göre kodu yaz.
+Katı bir eşik yok. İyi bir yaklaşım bu veride **f1 olarak ~0.80 ve üzerini** yakalar; oraya yaklaş. Ama asıl değerlendirilen: yöntemleri **nasıl karşılaştırdığın** ve sonucu nasıl **yorumladığın**. (İpucu: en gelişmiş yöntem her zaman kazanmayabilir — neden kazandığını/kaybettiğini tartışmak, kazanandan daha değerli.)
 
-1. **`load_data(path)`** — CSV'yi oku, DataFrame döndür
-2. **`explore_data(df)`** — satır sayısı, sınıf dağılımı, ortalama yorum uzunluğu
-3. **`clean_text(text)`** — Türkçe'ye duyarlı küçük harf + noktalama/rakam temizliği
-4. **`preprocess(series)`** — Seriye `clean_text` uygula
-5. **`split_data(df)`** — stratified train/test ayrımı (%80/%20)
-6. **`train_tfidf(X_train, y_train)`** — **Yöntem A**: TF-IDF + LogisticRegression
-7. **`train_lsa(X_train, y_train)`** — **Yöntem B**: TF-IDF + TruncatedSVD (LSA) + LogisticRegression
-8. **`evaluate(model, X_test, y_test)`** — accuracy/precision/recall/f1
-9. **`compare_methods(tfidf_model, lsa_model, X_test, y_test)`** — iki yöntemi yan yana karşılaştır
-10. **`error_analysis(model, X_test, y_test, n)`** — yanlış sınıflanan örnekleri incele
+## 🚀 Nasıl gönderirsin
 
-## 🎓 Öğrenme Hedefleri
+1. Bu repoyu **fork'la**, kendi hesabında çöz. Repo'nun **public** olduğundan emin ol.
+2. Kaizu'da bu projede **"İncelet 🔍"** butonuna bas.
+3. **GitHub repo linkini** ve **neler yaptığını** (yaklaşımın, kararların, özellikle bakmamızı istediğin yerler) yaz, gönder.
+4. Eğitmenin projeni inceleyecek — yanıt **2-3 iş günü** sürebilir; sonucu ve geri bildirimi Kaizu'da göreceksin.
 
-Bu projeyi bitirdiğinde:
-- [x] **Türkçe'ye özgü** metin ön işleme yapabileceksin
-- [x] **TF-IDF (seyrek temsil)** ile metni sayısal vektöre çevirebileceksin
-- [x] **LSA / TruncatedSVD (yoğun temsil)** ile boyut indirgemeyi uygulayabileceksin
-- [x] İki farklı metin temsilini **f1 skoru üzerinden karşılaştırabileceksin**
-- [x] **Hata analizi** yaparak bir modelin neden yanıldığını yorumlayabileceksin
-- [x] Sonuçları **raporlayıp yorumlayabileceksin** (aşağıdaki "Sonuçlarını Yorumla" bölümüne bak)
+## 💡 Hatırlatmalar
 
-## 🧪 Testler
+- Kütüphane seçimi sana ait. `requirements.txt`'te önerilen bir başlangıç seti var; dilediğini ekleyebilirsin.
+- Kod ve rapor **senin** olmalı — eğitmen sana yaklaşımını soracak.
+- Amaç mükemmel bir model değil; **bir data scientist gibi düşünüp** yöntemleri kıyaslaman ve dürüstçe yorumlaman.
 
-Test dosyası: `tests/test_question.py` (15 test)
-
-Tümü pass olmalı:
-- `load_data` yapısı (~570 satır, `['yorum','duygu']`)
-- `explore_data` çıktısı (n_rows/n_positive/n_negative/avg_length, dengeli dağılım)
-- `clean_text` küçük harf + noktalama/rakam temizliği + boşluk sadeleştirme
-- `preprocess` seri üzerinde doğru çalışıyor
-- `split_data` %80/%20 + stratify doğru
-- `train_tfidf` / `train_lsa` pipeline döner, predict eder
-- `evaluate` metrikleri 0-1 aralığında
-- **TF-IDF f1 ≥ 0.80** (Türkçe sentiment'te TF-IDF genelde ~0.84 civarı verir)
-- `compare_methods` her iki yöntem için metrik + `better_f1` geçerli anahtar
-- `error_analysis` yanlış örnek listesi, her biri `yorum`+`gercek`+`tahmin` içerir, ≤n
-
-## 📊 Sonuçlarını Yorumla (rapor bölümü)
-
-`run_pipeline` benzeri bir akışı `if __name__ == "__main__":` bloğunda
-çalıştırdığında şuna benzer bir çıktı göreceksin:
-
-```
-Karşılaştırma: {
-  'tfidf': {'accuracy': ~0.83, 'precision': ~0.82, 'recall': ~0.86, 'f1': ~0.84},
-  'lsa':   {'accuracy': ~0.76, 'precision': ~0.78, 'recall': ~0.74, 'f1': ~0.76},
-  'better_f1': 'tfidf'
-}
-```
-
-**Not**: LSA'nın TF-IDF'ten biraz düşük f1 vermesi **beklenen ve öğretici**
-bir sonuçtur — boyut indirgeme (100 bileşene sıkıştırma) bir miktar bilgi
-kaybına yol açar. Bu proje seni "TF-IDF her zaman kazanır" demeye değil,
-**neden** kazandığını (Türkçe'nin ek/kök yapısında ayırt edici kelimelerin
-seyrek temsilde daha net kalması, LSA'nın 100 boyuta sıkıştırırken bu ayrımı
-bulanıklaştırması) düşünmeye itiyor.
-
-`error_analysis` çıktısına bak: yanlış sınıflanan yorumlarda ironi, çok kısa
-yorumlar ("çok çok fazla çökmüş burada" gibi bağlamsız ifadeler) veya karışık
-duygu içeren cümleler (hem övgü hem eleştiri) öne çıkıyor mu? Bunu kısaca
-kendi kelimelerinle yorumla.
-
-## 💡 İpuçları
-
-- **Türkçe lowercase**: önce `text.replace('İ','i').replace('I','ı')`, sonra
-  `.lower()`. Sıra önemli — aksi halde "İyi" gibi kelimeler yanlış küçülür.
-- **clean_text** regex: `re.sub(r'[^a-zçğıöşü\s]', ' ', text)` → Türkçe harf +
-  boşluk dışını siler.
-- **Pipeline ham string alır** — `TfidfVectorizer` içine zaten temizlenmiş
-  metin veriyorsun (`split_data` bunu `preprocess` ile hallediyor), elle
-  vektörize etmene gerek yok.
-- **TF-IDF vs LSA farkı sadece bir satır**: `train_lsa` içinde `TfidfVectorizer`
-  ile `LogisticRegression` arasına `TruncatedSVD(n_components=100)` ekleniyor.
-  Bunun dışında pipeline mantığı aynı.
-- **error_analysis**'ta `X_test`/`y_test` pandas Series olabilir — `np.asarray()`
-  ile diziye çevirip index hizasını koruyarak gez.
-
-## 🚫 Dikkat
-
-- `tests/test_question.py` dosyasını **değiştirme**
-- `random_state=42`, `test_size=0.2`, `max_features=5000`, `n_components=100`
-  değerlerini değiştirme (testler ve eşikler bu değerlere göre kalibre edildi)
-- `_solution/` klasörü yok (DB'de saklanır, dersin haftası geçince açılır)
-- Dokunabileceğin dosyalar: `tasks/task_manager.py` (kodu yaz) +
-  `kaizu_config.py` (sadece USER_ID)
+Başarılar 🚀

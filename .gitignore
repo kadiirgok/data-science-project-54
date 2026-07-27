@@ -23,3 +23,8 @@ _solution/
 *.h5
 *.joblib
 saved_model/
+
+# Notebook / model çıktıları
+.ipynb_checkpoints/
+*.joblib
+*.h5
