@@ -37,7 +37,7 @@ sonuç çıktığını yorumlamak.
 ```bash
 # Fork + clone
 git clone <your-fork-url>
-cd ds-54-turkce-yorum-analizi
+cd data-science-project-54
 
 # Virtual environment
 python -m venv venv
