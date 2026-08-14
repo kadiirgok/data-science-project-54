@@ -24,7 +24,7 @@ from sentence_transformers import SentenceTransformer
 
 
 # Sabit Değişkenler 
-DATA_PATH = "tr_yorumlar.csv"
+DATA_PATH = "data/tr_yorumlar.csv"
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 EMBEDDING_MODEL_NAME = "emrecan/bert-base-turkish-cased-mean-nli-stsb-tr"
